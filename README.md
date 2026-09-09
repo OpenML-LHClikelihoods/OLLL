@@ -27,7 +27,9 @@ Example interface for the OLLL library
     ret = adapter.predict ( yields )
     print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
 ```
-The NNAdapter can also be acceded via
+
+
+The NNAdapter can also be accessed via
 
 ```
 pip install -i https://test.pypi.org/simple/ oll==0.1.0
