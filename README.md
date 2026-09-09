@@ -1,6 +1,9 @@
+
+# Open library of learned likelihoods from LHC experiments
+
 Example interface for the OLLL library
 
-# Example usage (taken from ATLAS-SUSY-2019-09):
+## Example usage (taken from ATLAS-SUSY-2019-09):
 
 ```python
     regions = [ 'SRhigh_0Jb_cuts', 'SRhigh_0Jc_cuts', 'SRhigh_0Jd_cuts',
