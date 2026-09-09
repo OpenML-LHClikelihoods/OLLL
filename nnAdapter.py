@@ -2,11 +2,10 @@
 
 """
 .. module:: nnAdapter
-   :synopsis: An Adapter class that wraps around the neural networks (e.g. onnx
-   files), handle all the pre and post processing. This adapter is
-   meant to be published with the ML paper, not with e.g. SModelS.
+   :synopsis: An Adapter class that wraps around the neural networks 
+   published in arXiv:XXXX, handling all the pre- and post-processing.
 
-.. moduleauthor:: Wolfgang Waltenberger <wolfgang.waltenberger@gmail.com>
+.. moduleauthor:: OLLL Collaboration
 
 """
 
@@ -29,14 +28,17 @@ class NNAdapter:
                   "session_options", "onnxfilename" ]
 
     def __init__( self, mlModel : Union[bytes,str,onnx.ModelProto,os.PathLike],
-                  onnxfilename : str, session_options : dict = {} ):
+                  onnxfilename : None|str = None, session_options : dict = {} ):
         """
         :param mlModel: the model, as a ModelProto, as a bytes stream,
         or as a path to an onnx file (needing to end with .onnx)
         :param onnxfilename: filename of onnxfile, for debugging only
+        if None, then assume it is the same as mlModel
         :param session_options: options for the onnxruntime inference session,
         e.g. { "inter_op_num_threads": 1 }
         """
+        if onnxfilename == None:
+            onnxfilename = str(mlModel)
         assert type(mlModel) in [ bytes, str, onnx.ModelProto,os.PathLike],\
             "mlModel needs to be one of: bytes, str, onnx.ModelProto, PathType"
         if type(mlModel) == str and mlModel.endswith ( "onnx") and \
@@ -208,13 +210,6 @@ class NNAdapter:
         nll1obs  = nll0obs  + deltas[1]
         nllA1exp = nllA0exp + deltas[2]
         nllA1obs = nllA0obs + deltas[3]
-        ## error propagation, fixme for now we just do it by hand:
-        ## s_y = abs ( y * s_x )
-        ## FIXME this needs to be changed for something generic
-        #s_nll1exp  = abs ( deltas[4] * deltas[0] )
-        #s_nll1obs  = abs ( deltas[5] * deltas[1] )
-        #s_nllA1exp = abs ( deltas[6] * deltas[2] )
-        #s_nllA1obs = abs ( deltas[7] * deltas[3] )
 
         ret = { "nll_exp_0": nll0exp,  "nll_exp_1": nll1exp,
                 "nll_obs_0": nll0obs,  "nll_obs_1": nll1obs,
@@ -287,27 +282,3 @@ class NNAdapter:
             print( f"signal region {sr} not in input_dict" )
             ret.append ( 0. )
         return ret
-
-if __name__ == "__main__":
-    regions = [ 'SRhigh_0Jb_cuts', 'SRhigh_0Jc_cuts', 'SRhigh_0Jd_cuts',
-        'SRhigh_0Je_cuts', 'SRhigh_0Jf1_cuts', 'SRhigh_0Jf2_cuts',
-        'SRhigh_0Jg1_cuts', 'SRhigh_0Jg2_cuts', 'SRhigh_nJa_cuts',
-        'SRhigh_nJb_cuts', 'SRhigh_nJc_cuts', 'SRhigh_nJd_cuts',
-        'SRhigh_nJe_cuts', 'SRhigh_nJf_cuts', 'SRhigh_nJg_cuts',
-        'SRlow_0Jb_cuts', 'SRlow_0Jc_cuts', 'SRlow_0Jd_cuts',
-        'SRlow_0Je_cuts', 'SRlow_0Jf1_cuts', 'SRlow_0Jf2_cuts',
-        'SRlow_0Jg1_cuts', 'SRlow_0Jg2_cuts', 'SRlow_nJb_cuts',
-        'SRlow_nJc_cuts', 'SRlow_nJd_cuts', 'SRlow_nJe_cuts',
-        'SRlow_nJf1_cuts', 'SRlow_nJf2_cuts', 'SRlow_nJg1_cuts',
-        'SRlow_nJg2_cuts', 'CR_0J_WZ_cuts', 'CR_nJ_WZ_cuts' ]
-    # onnxFile = "../../unittests/testFiles/test.onnx"
-    onnxFile = "test.onnx"
-
-    adapter = NNAdapter ( onnxFile, False )
-
-    yields = {}
-    for region in regions: # predict for no yields
-        yields[ region ] = 0.
-    ret = adapter.predict ( yields )
-    print ("\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()))
-    import sys; import IPython; IPython.embed( colors = "neutral" ); sys.exit()
