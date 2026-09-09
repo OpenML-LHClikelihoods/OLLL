@@ -1,4 +1,4 @@
-OLLL
+Example interface for the OLLL library
 
 # Example usage (taken from ATLAS-SUSY-2019-09):
 
@@ -23,4 +23,9 @@ OLLL
         yields[ region ] = 0.
     ret = adapter.predict ( yields )
     print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
+```
+The NNAdapter can also be acceded via
+
+```
+pip install -i https://test.pypi.org/simple/ oll==0.1.0
 ```
