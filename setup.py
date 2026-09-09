@@ -15,7 +15,7 @@ setup(
     install_requires=["onnx>=1.10.0", "onnxruntime>=1.20.0", "numpy>=2.0.0", "pyyaml"],
     description="Neural network adapter for LHC likelihood interpretation",
     license="GPLv3",
-    url="https://github.com/OLLL/OLLL",
+    url="https://github.com/OpenML-LHClikelihoods/",
     py_modules=["nnAdapter"],
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
