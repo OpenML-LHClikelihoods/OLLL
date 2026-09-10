@@ -32,5 +32,5 @@ Example interface for the OLLL library
 The NNAdapter can also be accessed via
 
 ```
-pip install -i https://test.pypi.org/simple/ oll==0.1.0
+pip install -i https://test.pypi.org/simple/ oll
 ```
