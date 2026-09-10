@@ -42,5 +42,5 @@ statistical precision.
 The NNAdapter can also be accessed via
 
 ```
-pip install -i https://test.pypi.org/simple/ oll
+pip install -i https://test.pypi.org/simple/ olll
 ```
