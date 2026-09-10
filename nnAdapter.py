@@ -2,7 +2,7 @@
 
 """
 .. module:: nnAdapter
-   :synopsis: An Adapter class that wraps around the neural networks 
+   :synopsis: An Adapter class that wraps around the neural networks
    published in arXiv:XXXX, handling all the pre- and post-processing.
 
 .. moduleauthor:: OLLL Collaboration
@@ -24,7 +24,7 @@ class NNAdapter:
     """
     Adapter that wraps around a neural network
     """
-    __slots__ = [ "mlModel", "modelType", "onnxMeta", "srOrder", "regressor", 
+    __slots__ = [ "mlModel", "modelType", "onnxMeta", "srOrder", "regressor",
                   "session_options", "onnxfilename" ]
 
     def __init__( self, mlModel : Union[bytes,str,onnx.ModelProto,os.PathLike],
@@ -240,6 +240,64 @@ class NNAdapter:
                     'nll_obs_1': ..., 'nllA_exp_0': ..., 'nllA_exp_1': ...,
                     'nllA_obs_0': ..., 'nllA_obs_1': ... }
         """
+        scaled_yields = self.preprocess ( yields )
+        out = self._predictFromScaledYields ( scaled_yields )
+        ret = self.postprocess ( out )
+        return ret
+
+    def totalYieldsFromSignals ( self, signal_yields : dict,
+           obs_as_bg : list = [] ) -> dict:
+        """ given the signal yields, return the total
+        yields, signal + background
+
+        :param signal_yields: the signal yields, as a (srname, yield) dictionary
+        :param obs_abs_bg: a list of signal regions for which we use 
+        observations as background_yields ("postfit")
+        :returns: the total yields, as a dictionary
+        """
+        new_yields = {}
+
+        for srname,smyield in self.onnxMeta["bkg_yields"].items():
+            #p1 = srname.rfind("-")
+            #realname = srname[:p1]
+            realname = srname
+            if realname not in signal_yields:
+                realname = f"{realname}[{srname[p1+1:]}]"
+                if realname not in signal_yields:
+                    continue
+                assert realname in signal_yields, \
+                  f"nnInterface: cannot find sr name {realname} in '{' '.join(self.nsignals.keys())}'"
+            # smodelsname = self.data.globalInfo
+            # signal = float ( signal_yields[realname]*poi_test )
+            signal = float ( smyield )
+            if srname in obs_as_bg:
+                smyield = self.adaptor.onnxMeta["obs_yields"][srname]
+            tot = smyield + signal
+            new_yields[srname] = tot
+        return new_yields
+
+    def predict_new ( self, yields : Union[dict,list],
+           yields_are_signal_yields : bool = True,
+           obs_as_bg : list = [] ) -> dict:
+        """ proposal for a slightly different API
+
+        :param yields: e.g. { "SR1": 3, "SR2": 5 }, or [3,5]
+        (in which case the order must match the one in the json)
+
+        :param yields_are_signal_yields: if True, then yields are
+        interpreted as signal yields, and the backgrounds get added.
+        if False, yields are assumed to be total yields
+
+        :param obs_as_bg: a list of signal regions for which we use 
+        observations as background_yields ("postfit"), given 
+        yields_are_signal_yields is True
+
+        :returns: { 'nll_exp_0': ..., 'nll_exp_1': ..., 'nll_obs_0': ...,
+                    'nll_obs_1': ..., 'nllA_exp_0': ..., 'nllA_exp_1': ...,
+                    'nllA_obs_0': ..., 'nllA_obs_1': ... }
+        """
+        if yields_are_signal_yields:
+            yields = self.totalYieldsFromSignals ( yields, obs_as_bg )
         scaled_yields = self.preprocess ( yields )
         out = self._predictFromScaledYields ( scaled_yields )
         ret = self.postprocess ( out )

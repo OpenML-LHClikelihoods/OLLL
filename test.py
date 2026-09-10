@@ -6,14 +6,10 @@ onnxFile = "test.onnx"
 
 adapter = NNAdapter ( onnxFile, session_options = {} )
 
-yields = {}
-yields = adapter.onnxMeta["bkg_yields"]
-for srname, bkg_yield in yields.items():
-    ## add a signal here
-    yields[srname] += 0.
-ret = adapter.predict ( yields )
+bkg_yields = adapter.onnxMeta["bkg_yields"]
+sig_yields = { k: 0. for k in bkg_yields }
+ret = adapter.predict_new ( sig_yields, yields_are_signal_yields = True )
 
-for srname,smyield in yields.items():
-    print ( srname, smyield )
-
+print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
+ret = adapter.predict ( bkg_yields )
 print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
