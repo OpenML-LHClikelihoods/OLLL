@@ -16,6 +16,7 @@ statistical precision.
 ## Example usage (taken from ATLAS-SUSY-2019-09):
 
 ```python
+	  from nnAdapter import NNAdapter
     regions = [ 'SRhigh_0Jb_cuts', 'SRhigh_0Jc_cuts', 'SRhigh_0Jd_cuts',
         'SRhigh_0Je_cuts', 'SRhigh_0Jf1_cuts', 'SRhigh_0Jf2_cuts',
         'SRhigh_0Jg1_cuts', 'SRhigh_0Jg2_cuts', 'SRhigh_nJa_cuts',
