@@ -1,7 +1,17 @@
-
 # Open library of learned likelihoods from LHC experiments
 
-Example interface for the OLLL library
+The release of full statistical models from LHC analyses is a major milestone in the
+LHC’s legacy. They encapsulate the full information of an analysis, including the likeli-
+hood given data. Thus, full releases enable collider phenomenology to be performed at full
+statistical precision. However, this comes with a significant enlargement of computational
+costs. For most reinterpretation processes, we are interested in the profiled likelihood,
+which is slow to extract from the statistical model, particularly for analyses with mul-
+tiple signal regions. To mitigate this, we present OLLL, an Open Library of Learned
+Likelihoods from LHC experiments. OLLL is composed of profiled likelihood functions
+modelled with Neural Networks (NNs). We show, through five examples of increasing
+complexity, that such functions can be well described with simple NNs, published in the
+ONNX format, and easily used by different reinterpretation tools without compromising
+statistical precision.
 
 ## Example usage (taken from ATLAS-SUSY-2019-09):
 
