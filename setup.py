@@ -16,7 +16,7 @@ setup(
     description="Neural network adapter for LHC likelihood interpretation",
     license="GPLv3",
     url="https://github.com/OpenML-LHClikelihoods/",
-    py_modules=["nnAdapter", "nnPreprocessing.py" ],
+    py_modules=["nnAdapter", "nnPreprocessing" ],
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     classifiers=[
