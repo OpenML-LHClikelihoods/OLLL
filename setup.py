@@ -8,15 +8,15 @@ def read(fname):
 
 setup(
     name = "olll",
-    version = "0.1.0",
+    version = "0.1.1",
     author = "OLLL collaboration",
     author_email="",
-    python_requires='>=3.8',
+    python_requires='>=3.10',
     install_requires=["onnx>=1.10.0", "onnxruntime>=1.20.0", "numpy>=2.0.0", "pyyaml"],
     description="Neural network adapter for LHC likelihood interpretation",
     license="GPLv3",
     url="https://github.com/OpenML-LHClikelihoods/",
-    py_modules=["nnAdapter"],
+    py_modules=["nnAdapter", "nnPreprocessing.py" ],
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     classifiers=[
