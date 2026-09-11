@@ -13,7 +13,7 @@ complexity, that such functions can be well described with simple NNs, published
 ONNX format, and easily used by different reinterpretation tools without compromising
 statistical precision.
 
-## Example usage (taken from ATLAS-SUSY-2019-09):
+## Example usage (taken from ATLAS-SUSY-2018-04):
 
 ```python
 from nnAdapter import NNAdapter
@@ -34,6 +34,40 @@ print ( )
 print ( f"predicting for signal yields:" )
 print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
 print ( )
+```
+
+This produces as output:
+
+```
+predicting for total yields:
+nll_exp_0 : 99.0
+nll_exp_1 : 99.0
+nll_obs_0 : 99.6
+nll_obs_1 : 99.6
+nllA_exp_0: 99.0
+nllA_exp_1: 99.0
+nllA_obs_0: 99.1
+nllA_obs_1: 99.1
+nll_obs_max: 99.3
+sigma_exp : 0.0
+sigma_obs : 0.0
+sigma_expA: 0.0
+sigma_obsA: 0.0
+
+predicting for signal yields:
+nll_exp_0 : 99.0
+nll_exp_1 : 99.0
+nll_obs_0 : 99.6
+nll_obs_1 : 99.6
+nllA_exp_0: 99.0
+nllA_exp_1: 99.0
+nllA_obs_0: 99.1
+nllA_obs_1: 99.1
+nll_obs_max: 99.3
+sigma_exp : 0.0
+sigma_obs : 0.0
+sigma_expA: 0.0
+sigma_obsA: 0.0
 ```
 
 The NNAdapter can also be accessed via
