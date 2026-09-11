@@ -17,8 +17,7 @@ statistical precision.
 
 ```python
 from nnAdapter import NNAdapter
-regions = [ 'SR1cut_cuts-0', 'SR2cut_cuts-0' ]
-onnxFile = "test.onnx"
+onnxFile = "atlas-susy-2018-04.onnx"
 
 adapter = NNAdapter ( onnxFile, session_options = {} )
 
