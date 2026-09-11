@@ -16,29 +16,25 @@ statistical precision.
 ## Example usage (taken from ATLAS-SUSY-2019-09):
 
 ```python
-	  from nnAdapter import NNAdapter
-    regions = [ 'SRhigh_0Jb_cuts', 'SRhigh_0Jc_cuts', 'SRhigh_0Jd_cuts',
-        'SRhigh_0Je_cuts', 'SRhigh_0Jf1_cuts', 'SRhigh_0Jf2_cuts',
-        'SRhigh_0Jg1_cuts', 'SRhigh_0Jg2_cuts', 'SRhigh_nJa_cuts',
-        'SRhigh_nJb_cuts', 'SRhigh_nJc_cuts', 'SRhigh_nJd_cuts',
-        'SRhigh_nJe_cuts', 'SRhigh_nJf_cuts', 'SRhigh_nJg_cuts',
-        'SRlow_0Jb_cuts', 'SRlow_0Jc_cuts', 'SRlow_0Jd_cuts',
-        'SRlow_0Je_cuts', 'SRlow_0Jf1_cuts', 'SRlow_0Jf2_cuts',
-        'SRlow_0Jg1_cuts', 'SRlow_0Jg2_cuts', 'SRlow_nJb_cuts',
-        'SRlow_nJc_cuts', 'SRlow_nJd_cuts', 'SRlow_nJe_cuts',
-        'SRlow_nJf1_cuts', 'SRlow_nJf2_cuts', 'SRlow_nJg1_cuts',
-        'SRlow_nJg2_cuts', 'CR_0J_WZ_cuts', 'CR_nJ_WZ_cuts' ]
-    onnxFile = "test.onnx"
+from nnAdapter import NNAdapter
+regions = [ 'SR1cut_cuts-0', 'SR2cut_cuts-0' ]
+onnxFile = "test.onnx"
 
-    adapter = NNAdapter ( onnxFile, session_options = {} )
+adapter = NNAdapter ( onnxFile, session_options = {} )
 
-    yields = {}
-    for region in regions: # predict for zero total yields (signal + background)
-        yields[ region ] = 0.
-    ret = adapter.predict ( yields )
-    print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
+bkg_yields = adapter.onnxMeta["bkg_yields"]
+ret = adapter.predict ( bkg_yields, yields_are_signal_yields = False )
+print ( "predicting for total yields:" )
+print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
+
+sig_yields = { k: 0. for k in bkg_yields }
+ret = adapter.predict ( sig_yields, yields_are_signal_yields = True )
+
+print ( )
+print ( f"predicting for signal yields:" )
+print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
+print ( )
 ```
-
 
 The NNAdapter can also be accessed via
 
