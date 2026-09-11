@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# example taken from ATLAS-SUSY-2018-04
+
 from nnAdapter import NNAdapter
 regions = [ 'SR1cut_cuts-0', 'SR2cut_cuts-0' ]
 onnxFile = "test.onnx"
