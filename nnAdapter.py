@@ -231,20 +231,6 @@ class NNAdapter:
             ret["sigma_obsA"] = errs[3]
         return ret
 
-    def predict ( self, yields : Union[dict,list] ) -> dict:
-        """ predict for yields, the main method
-        :param yields: e.g. { "SR1": 3, "SR2": 5 }, or [3,5]
-        (in which case the order must match the one in the json)
-
-        :returns: { 'nll_exp_0': ..., 'nll_exp_1': ..., 'nll_obs_0': ...,
-                    'nll_obs_1': ..., 'nllA_exp_0': ..., 'nllA_exp_1': ...,
-                    'nllA_obs_0': ..., 'nllA_obs_1': ... }
-        """
-        scaled_yields = self.preprocess ( yields )
-        out = self._predictFromScaledYields ( scaled_yields )
-        ret = self.postprocess ( out )
-        return ret
-
     def totalYieldsFromSignals ( self, signal_yields : dict,
            obs_as_bg : list = [] ) -> dict:
         """ given the signal yields, return the total
@@ -253,30 +239,23 @@ class NNAdapter:
         :param signal_yields: the signal yields, as a (srname, yield) dictionary
         :param obs_abs_bg: a list of signal regions for which we use 
         observations as background_yields ("postfit")
+
         :returns: the total yields, as a dictionary
         """
         new_yields = {}
 
         for srname,smyield in self.onnxMeta["bkg_yields"].items():
-            #p1 = srname.rfind("-")
-            #realname = srname[:p1]
-            realname = srname
-            if realname not in signal_yields:
-                realname = f"{realname}[{srname[p1+1:]}]"
-                if realname not in signal_yields:
-                    continue
-                assert realname in signal_yields, \
-                  f"nnInterface: cannot find sr name {realname} in '{' '.join(self.nsignals.keys())}'"
-            # smodelsname = self.data.globalInfo
-            # signal = float ( signal_yields[realname]*poi_test )
-            signal = float ( smyield )
+            assert srname in signal_yields, \
+                f"nnInterface: cannot find sr name {srname} in '{' '.join( signal_yields.keys())}'"
+            signal = signal_yields[srname]
             if srname in obs_as_bg:
                 smyield = self.adaptor.onnxMeta["obs_yields"][srname]
+                signal = 0.
             tot = smyield + signal
             new_yields[srname] = tot
         return new_yields
 
-    def predict_new ( self, yields : Union[dict,list],
+    def predict ( self, yields : Union[dict,list],
            yields_are_signal_yields : bool = True,
            obs_as_bg : list = [] ) -> dict:
         """ proposal for a slightly different API
@@ -292,9 +271,13 @@ class NNAdapter:
         observations as background_yields ("postfit"), given 
         yields_are_signal_yields is True
 
-        :returns: { 'nll_exp_0': ..., 'nll_exp_1': ..., 'nll_obs_0': ...,
-                    'nll_obs_1': ..., 'nllA_exp_0': ..., 'nllA_exp_1': ...,
-                    'nllA_obs_0': ..., 'nllA_obs_1': ... }
+        :returns: the negative log likelihoods (nlls) as a dictionary:
+        { 'nll_exp_0': ..., 'nll_exp_1': ..., 'nll_obs_0': ...,
+        'nll_obs_1': ..., 'nllA_exp_0': ..., 'nllA_exp_1': ...,
+        'nllA_obs_0': ..., 'nllA_obs_1': ... }
+        where 0, 1 means mu=0, 1, respectively. exp refers to a priori
+        expectation, obs are the observed values. nllA means the 
+        nll is evaluated for the Asimov dataset with mu' = 0.
         """
         if yields_are_signal_yields:
             yields = self.totalYieldsFromSignals ( yields, obs_as_bg )

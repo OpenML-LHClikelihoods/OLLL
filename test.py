@@ -8,7 +8,7 @@ adapter = NNAdapter ( onnxFile, session_options = {} )
 
 bkg_yields = adapter.onnxMeta["bkg_yields"]
 sig_yields = { k: 0. for k in bkg_yields }
-ret = adapter.predict_new ( sig_yields, yields_are_signal_yields = True )
+ret = adapter.predict ( sig_yields, yields_are_signal_yields = True )
 
 print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
 ret = adapter.predict ( bkg_yields )
