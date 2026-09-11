@@ -1,27 +1,40 @@
 #!/usr/bin/env python3
+
 """
 .. module:: example_with_crs
    :synopsis: a slighty more involved example for how to use
    the nnAdapter, including control regions
    example taken from ATLAS-SUSY-2019-09
 
+.. author:: OLLL collaboration
+
 """
 
 from nnAdapter import NNAdapter
-regions = [ 'SR1cut_cuts-0', 'SR2cut_cuts-0' ]
-onnxFile = "test.onnx"
+onnxFile = "atlas-susy-2019-09.onnx"
 
 adapter = NNAdapter ( onnxFile, session_options = {} )
 
-bkg_yields = adapter.onnxMeta["bkg_yields"]
+bkg_yields = adapter.onnxMeta [ "bkg_yields" ]
+
 ret = adapter.predict ( bkg_yields, yields_are_signal_yields = False )
-print ( "predicting for total yields:" )
-print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
+print ( "predicting for total yields (prefit):" )
+print ( "\n".join( f"{key:10s}: {value:.3f}" for key,value in ret.items()) )
 
 sig_yields = { k: 0. for k in bkg_yields }
-ret = adapter.predict ( sig_yields, yields_are_signal_yields = True )
+ret = adapter.predict ( sig_yields, yields_are_signal_yields = True,
+                        obs_as_bg = [] )
 
 print ( )
-print ( f"predicting for signal yields:" )
-print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
+print ( f"predicting for signal yields (prefit):" )
+print ( "\n".join( f"{key:10s}: {value:.3f}" for key,value in ret.items()) )
+print ( )
+
+sig_yields = { k: 0. for k in bkg_yields }
+ret = adapter.predict ( sig_yields, yields_are_signal_yields = True,
+                        obs_as_bg = [ "WZ_CR_0jets_cuts-0", "WZ_CR_HighHT_cuts-0", "WZ_CR_LowHT_cuts-0" ] )
+
+print ( )
+print ( f"predicting for signal yields (postfit):" )
+print ( "\n".join( f"{key:10s}: {value:.3f}" for key,value in ret.items()) )
 print ( )

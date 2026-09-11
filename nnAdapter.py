@@ -56,6 +56,37 @@ class NNAdapter:
         self._getSROrder()
         self._instantiateRegressor()
 
+    def predict ( self, yields : Union[dict,list],
+           yields_are_signal_yields : bool = True,
+           obs_as_bg : list = [] ) -> dict:
+        """ proposal for a slightly different API
+
+        :param yields: e.g. { "SR1": 3, "SR2": 5 }, or [3,5]
+        (in which case the order must match the one in the json)
+
+        :param yields_are_signal_yields: if True, then yields are
+        interpreted as signal yields, and the backgrounds get added.
+        if False, yields are assumed to be total yields
+
+        :param obs_as_bg: a list of signal regions for which we use 
+        observations as background_yields ("postfit"), given 
+        yields_are_signal_yields is True
+
+        :returns: the negative log likelihoods (nlls) as a dictionary:
+        { 'nll_exp_0': ..., 'nll_exp_1': ..., 'nll_obs_0': ...,
+        'nll_obs_1': ..., 'nllA_exp_0': ..., 'nllA_exp_1': ...,
+        'nllA_obs_0': ..., 'nllA_obs_1': ... }
+        where 0, 1 means mu=0, 1, respectively. exp refers to a priori
+        expectation, obs are the observed values. nllA means the 
+        nll is evaluated for the Asimov dataset with mu' = 0.
+        """
+        if yields_are_signal_yields:
+            yields = self._totalYieldsFromSignals ( yields, obs_as_bg )
+        scaled_yields = self._preprocess ( yields )
+        out = self._predictFromScaledYields ( scaled_yields )
+        ret = self._postprocess ( out )
+        return ret
+
     def _instantiateRegressor ( self ):
         """ create the actual inference session object """
         so = onnxruntime.SessionOptions()
@@ -181,7 +212,7 @@ class NNAdapter:
         arr = arr[0][0]
         return arr
 
-    def postprocess( self, arr : np.ndarray,
+    def _postprocess( self, arr : np.ndarray,
            add_errors : bool = True ) -> dict:
         """ given the networks predictions, compute the NLLs
 
@@ -231,7 +262,7 @@ class NNAdapter:
             ret["sigma_obsA"] = errs[3]
         return ret
 
-    def totalYieldsFromSignals ( self, signal_yields : dict,
+    def _totalYieldsFromSignals ( self, signal_yields : dict,
            obs_as_bg : list = [] ) -> dict:
         """ given the signal yields, return the total
         yields, signal + background
@@ -243,50 +274,25 @@ class NNAdapter:
         :returns: the total yields, as a dictionary
         """
         new_yields = {}
+        account_for_crs = obs_as_bg[:]
 
         for srname,smyield in self.onnxMeta["bkg_yields"].items():
             assert srname in signal_yields, \
                 f"nnInterface: cannot find sr name {srname} in '{' '.join( signal_yields.keys())}'"
             signal = signal_yields[srname]
             if srname in obs_as_bg:
-                smyield = self.adaptor.onnxMeta["obs_yields"][srname]
+                account_for_crs.remove ( srname )
+                smyield = self.onnxMeta["obs_yields"][srname]
                 signal = 0.
             tot = smyield + signal
             new_yields[srname] = tot
+        if len(account_for_crs)>0:
+            raise Exception ( f"signal region(s) {account_for_crs} unknown" )
+
         return new_yields
 
-    def predict ( self, yields : Union[dict,list],
-           yields_are_signal_yields : bool = True,
-           obs_as_bg : list = [] ) -> dict:
-        """ proposal for a slightly different API
 
-        :param yields: e.g. { "SR1": 3, "SR2": 5 }, or [3,5]
-        (in which case the order must match the one in the json)
-
-        :param yields_are_signal_yields: if True, then yields are
-        interpreted as signal yields, and the backgrounds get added.
-        if False, yields are assumed to be total yields
-
-        :param obs_as_bg: a list of signal regions for which we use 
-        observations as background_yields ("postfit"), given 
-        yields_are_signal_yields is True
-
-        :returns: the negative log likelihoods (nlls) as a dictionary:
-        { 'nll_exp_0': ..., 'nll_exp_1': ..., 'nll_obs_0': ...,
-        'nll_obs_1': ..., 'nllA_exp_0': ..., 'nllA_exp_1': ...,
-        'nllA_obs_0': ..., 'nllA_obs_1': ... }
-        where 0, 1 means mu=0, 1, respectively. exp refers to a priori
-        expectation, obs are the observed values. nllA means the 
-        nll is evaluated for the Asimov dataset with mu' = 0.
-        """
-        if yields_are_signal_yields:
-            yields = self.totalYieldsFromSignals ( yields, obs_as_bg )
-        scaled_yields = self.preprocess ( yields )
-        out = self._predictFromScaledYields ( scaled_yields )
-        ret = self.postprocess ( out )
-        return ret
-
-    def preprocess ( self, yields : Union[dict,list] ) -> dict:
+    def _preprocess ( self, yields : Union[dict,list] ) -> dict:
         if type(yields)==dict:
             yields = self._inputDictToList ( yields )
         inp_list = np.array ( yields )
@@ -307,18 +313,21 @@ class NNAdapter:
         :returns: list of yields
         """
         ret = []
+        account_for_srs = list(in_dict.keys())
         if len(in_dict) != len ( self.srOrder ):
             raise Exception ( f"length of dict ({len(in_dict)} does not match srOrder ({len(self.srOrder)})" )
         for sr in self.srOrder:
             dsr = sr
-            if dsr.endswith ( "-0" ):
-                dsr = sr[:-2]
+            #if dsr.endswith ( "-0" ):
+            #    dsr = sr[:-2]
             if sr in in_dict:
                 ret.append ( in_dict[sr] )
+                account_for_srs.remove ( sr )
                 continue
-            if dsr in in_dict:
-                ret.append ( in_dict[dsr] )
-                continue
-            print( f"signal region {sr} not in input_dict" )
-            ret.append ( 0. )
+            #if dsr in in_dict:
+            #    ret.append ( in_dict[dsr] )
+            #    continue
+            raise Exception ( f"signal region {sr} not in input_dict" )
+        if len(account_for_srs)>0:
+            raise Exception ( f"signal region(s) {account_for_srs} unknown" )
         return ret
