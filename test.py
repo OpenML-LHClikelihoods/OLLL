@@ -11,5 +11,6 @@ sig_yields = { k: 0. for k in bkg_yields }
 ret = adapter.predict ( sig_yields, yields_are_signal_yields = True )
 
 print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
-ret = adapter.predict ( bkg_yields )
+print ( )
+ret = adapter.predict ( bkg_yields, yields_are_signal_yields = False )
 print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
