@@ -25,7 +25,7 @@ class NNAdapter:
     Adapter that wraps around a neural network
     """
     __slots__ = [ "mlModel", "modelType", "onnxMeta", "srOrder", "regressor",
-                  "session_options", "onnxfilename" ]
+                  "session_options", "onnxfilename", "crRegions" ]
 
     def __init__( self, mlModel : Union[bytes,str,onnx.ModelProto,os.PathLike],
                   onnxfilename : None|str = None, session_options : dict = {} ):
@@ -54,11 +54,12 @@ class NNAdapter:
         self.session_options = session_options
         self._parseMetaData ()
         self._getSROrder()
+        self._cleanCRs()
         self._instantiateRegressor()
 
     def predict ( self, yields : Union[dict,list],
            yields_are_signal_yields : bool = True,
-           obs_as_bg : list = [] ) -> dict:
+           obs_as_bg : list|None|str = [] ) -> dict:
         """ proposal for a slightly different API
 
         :param yields: e.g. { "SR1": 3, "SR2": 5 }, or [3,5]
@@ -70,7 +71,8 @@ class NNAdapter:
 
         :param obs_as_bg: a list of signal regions for which we use 
         observations as background_yields ("postfit"), given 
-        yields_are_signal_yields is True
+        yields_are_signal_yields is True. If None or "default", then 
+        use self.onnxMeta["crRegions"] as defined in the onnx file
 
         :returns: the negative log likelihoods (nlls) as a dictionary:
         { 'nll_exp_0': ..., 'nll_exp_1': ..., 'nll_obs_0': ...,
@@ -80,12 +82,37 @@ class NNAdapter:
         expectation, obs are the observed values. nllA means the 
         nll is evaluated for the Asimov dataset with mu' = 0.
         """
+        if obs_as_bg == None or obs_as_bg ==  "default":
+            obs_as_bg = self.onnxMeta["crRegions"]
         if yields_are_signal_yields:
             yields = self._totalYieldsFromSignals ( yields, obs_as_bg )
         scaled_yields = self._preprocess ( yields )
         out = self._predictFromScaledYields ( scaled_yields )
         ret = self._postprocess ( out )
         return ret
+
+    def _getCRs( self, channels : list ) -> list:
+        """ get a list of every signal region marked as a control region
+        """
+        crRegions = []
+        for ch in channels:
+            for regionName, regionType in ch.items():
+                if regionType == "CR":
+                    crRegions.append ( regionName )
+        return crRegions
+
+    def _cleanCRs ( self ):
+        """ the meta information has all regions of all models,
+        so we clean the list of control regions here, 
+        possibly also adding the "-o" postfix to regio names
+        """
+        newCRs = []
+        for r in self.onnxMeta["crRegions"]:
+            if r in self.srOrder:
+                newCRs.append ( r )
+            if r+"-0" in self.srOrder:
+                newCRs.append ( f"{r}-0" )
+        self.onnxMeta["crRegions"] = newCRs
 
     def _instantiateRegressor ( self ):
         """ create the actual inference session object """
@@ -154,6 +181,8 @@ class NNAdapter:
         remove_channels=[]
         import json
         for em in self.mlModel.metadata_props:
+            if em.key == "channels":
+                data["crRegions"] = self._getCRs ( eval ( em.value ) )
             if em.key == "remove_channels":
                 # remove these channels at the end, so that order does not matter
                 remove_channels = eval(em.value)

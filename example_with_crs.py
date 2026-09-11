@@ -26,13 +26,16 @@ ret = adapter.predict ( sig_yields, yields_are_signal_yields = True,
                         obs_as_bg = [] )
 
 print ( )
-print ( f"predicting for signal yields (prefit):" )
+print ( f"predicting for signal yields (postfit):" )
 print ( "\n".join( f"{key:10s}: {value:.3f}" for key,value in ret.items()) )
 print ( )
 
 sig_yields = { k: 0. for k in bkg_yields }
+# the following two do the same thing
+obs_as_bg = [ "WZ_CR_0jets_cuts-0", "WZ_CR_HighHT_cuts-0", "WZ_CR_LowHT_cuts-0" ]
+obs_as_bg = "default"
 ret = adapter.predict ( sig_yields, yields_are_signal_yields = True,
-                        obs_as_bg = [ "WZ_CR_0jets_cuts-0", "WZ_CR_HighHT_cuts-0", "WZ_CR_LowHT_cuts-0" ] )
+                        obs_as_bg = "default" )
 
 print ( )
 print ( f"predicting for signal yields (postfit):" )
