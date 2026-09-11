@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-
 """
-.. module:: example_usage
-   :synopsis: a simple example for how to use the nnAdapter
-   example taken from ATLAS-SUSY-2018-04
+.. module:: example_with_crs
+   :synopsis: a slighty more involved example for how to use
+   the nnAdapter, including control regions
+   example taken from ATLAS-SUSY-2019-09
 
 """
 
