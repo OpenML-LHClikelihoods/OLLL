@@ -28,7 +28,8 @@ class NNAdapter:
                   "session_options", "onnxfilename", "crRegions" ]
 
     def __init__( self, mlModel : Union[bytes,str,onnx.ModelProto,os.PathLike],
-                  onnxfilename : None|str = None, session_options : dict = {} ):
+                  onnxfilename : None|str = None, session_options : dict = {},
+                  validate_metadata : bool = True ):
         """
         :param mlModel: the model, as a ModelProto, as a bytes stream,
         or as a path to an onnx file (needing to end with .onnx)
@@ -36,6 +37,8 @@ class NNAdapter:
         if None, then assume it is the same as mlModel
         :param session_options: options for the onnxruntime inference session,
         e.g. { "inter_op_num_threads": 1 }
+        :param validate_metadata: if true, then validate metadata in onnx file,
+        before usage
         """
         if onnxfilename == None:
             onnxfilename = str(mlModel)
@@ -52,6 +55,9 @@ class NNAdapter:
                 sys.exit(-1)
         self.onnxfilename = onnxfilename
         self.session_options = session_options
+        if validate_metadata:
+            from metadataValidator import validateMetaData
+            validateMetaData ( self.mlModel.metadata_props )
         self._parseMetaData ()
         self._getSROrder()
         self._cleanCRs()
@@ -180,8 +186,6 @@ class NNAdapter:
         data["nllErrors"]= []
         remove_channels=[]
         import json
-        from metadataValidator import validateMetaData
-        validateMetaData ( self.mlModel.metadata_props )
         for em in self.mlModel.metadata_props:
             if em.key == "channels":
                 data["crRegions"] = self._getCRs ( eval ( em.value ) )
