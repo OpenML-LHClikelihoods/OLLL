@@ -82,7 +82,7 @@ class NNAdapter:
         expectation, obs are the observed values. nllA means the 
         nll is evaluated for the Asimov dataset with mu' = 0.
         """
-        if obs_as_bg == None or obs_as_bg ==  "default":
+        if obs_as_bg in [ None, "default", "postfit" ]:
             obs_as_bg = self.onnxMeta["crRegions"]
         if yields_are_signal_yields:
             yields = self._totalYieldsFromSignals ( yields, obs_as_bg )
