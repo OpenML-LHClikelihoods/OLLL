@@ -35,7 +35,7 @@ sig_yields = { k: 0. for k in bkg_yields }
 obs_as_bg = [ "WZ_CR_0jets_cuts-0", "WZ_CR_HighHT_cuts-0", "WZ_CR_LowHT_cuts-0" ]
 obs_as_bg = "default"
 ret = adapter.predict ( sig_yields, yields_are_signal_yields = True,
-                        obs_as_bg = "default" )
+                        obs_as_bg = None )
 
 print ( )
 print ( f"predicting for signal yields (postfit):" )
