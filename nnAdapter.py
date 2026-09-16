@@ -180,6 +180,8 @@ class NNAdapter:
         data["nllErrors"]= []
         remove_channels=[]
         import json
+        from metadataValidator import validateMetaData
+        validateMetaData ( self.mlModel.metadata_props )
         for em in self.mlModel.metadata_props:
             if em.key == "channels":
                 data["crRegions"] = self._getCRs ( eval ( em.value ) )
