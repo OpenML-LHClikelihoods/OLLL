@@ -17,13 +17,14 @@ adapter = NNAdapter ( onnxFile, session_options = {} )
 
 bkg_yields = adapter.onnxMeta [ "bkg_yields" ]
 
-ret = adapter.predict ( bkg_yields, yields_are_signal_yields = False )
+ret = adapter.predict ( bkg_yields, yields_are_signal_yields = False,
+       obs_as_bg = [] )
 print ( "predicting for total yields (prefit):" )
 print ( "\n".join( f"{key:10s}: {value:.3f}" for key,value in ret.items()) )
 
 sig_yields = { k: 0. for k in bkg_yields }
 ret = adapter.predict ( sig_yields, yields_are_signal_yields = True,
-                        obs_as_bg = [] )
+                        obs_as_bg = None )
 
 print ( )
 print ( f"predicting for signal yields (postfit):" )
