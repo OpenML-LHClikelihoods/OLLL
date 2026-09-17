@@ -9,14 +9,12 @@
 
 """
 
-from nnAdapter import NNAdapter
-regions = [ 'SR1cut_cuts-0', 'SR2cut_cuts-0' ]
+from hep_olll.nnAdapter import NNAdapter
 onnxFile = "atlas-susy-2018-04.onnx"
-
 adapter = NNAdapter ( onnxFile, session_options = {} )
-
 bkg_yields = adapter.onnxMeta["bkg_yields"]
 ret = adapter.predict ( bkg_yields, yields_are_signal_yields = False )
+
 print ( "predicting for total yields:" )
 print ( "\n".join( f"{key:10s}: {value:.1f}" for key,value in ret.items()) )
 

@@ -56,7 +56,7 @@ class NNAdapter:
         self.onnxfilename = onnxfilename
         self.session_options = session_options
         if validate_metadata:
-            from metadataValidator import validateMetaData
+            from hep_olll.metadataValidator import validateMetaData
             validateMetaData ( self.mlModel.metadata_props )
         self._parseMetaData ()
         self._getSROrder()
@@ -259,7 +259,7 @@ class NNAdapter:
                 "nllA_exp_0": ..., "nllA_exp_1": ...,
                 "nllA_obs_0": ..., "nllA_obs_1": ... }
         """
-        from nnPreprocessing import postprocess_nLLs
+        from hep_olll.nnPreprocessing import postprocess_nLLs
         deltas_prepd = np.array(arr, dtype=np.float64)
         trafos = self.onnxMeta["run_config"]["data"]["nLL_trafos"]
         nll_means = self.onnxMeta["nllMeans"]
@@ -284,7 +284,7 @@ class NNAdapter:
         if self.onnxMeta["nLL_obs_max"][1] is not None:
             ret["nll_obs_max"] = self.onnxMeta["nLL_obs_max"][1]
         if add_errors:
-            from nnPreprocessing import postprocess_nLLs_errors
+            from hep_olll.nnPreprocessing import postprocess_nLLs_errors
             errs = postprocess_nLLs_errors ( deltas_prepd[4:],
                     deltas_prepd[:4],
                     mean = nll_means,
@@ -313,7 +313,7 @@ class NNAdapter:
 
         for srname,smyield in self.onnxMeta["bkg_yields"].items():
             assert srname in signal_yields, \
-                f"nnInterface: cannot find sr name {srname} in '{' '.join( signal_yields.keys())}'"
+                f"nnInterface: cannot find sr name {srname} in '{ signal_yields }'"
             signal = signal_yields[srname]
             if srname in obs_as_bg:
                 account_for_crs.remove ( srname )
@@ -331,7 +331,7 @@ class NNAdapter:
         if type(yields)==dict:
             yields = self._inputDictToList ( yields )
         inp_list = np.array ( yields )
-        from nnPreprocessing import preprocess_features
+        from hep_olll.nnPreprocessing import preprocess_features
         trafos = self.onnxMeta["run_config"]["data"]["trafos"]
         nYields = len(yields)
         re = preprocess_features ( inp_list,

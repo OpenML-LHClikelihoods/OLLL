@@ -10,12 +10,13 @@
 
 """
 
-from nnAdapter import NNAdapter
+from hep_olll.nnAdapter import NNAdapter
 onnxFile = "atlas-susy-2019-09.onnx"
 
 adapter = NNAdapter ( onnxFile, session_options = {} )
 
 bkg_yields = adapter.onnxMeta [ "bkg_yields" ]
+import sys, IPython; IPython.embed( colors = "neutral" ); sys.exit()
 
 ret = adapter.predict ( bkg_yields, yields_are_signal_yields = False,
        obs_as_bg = [] )

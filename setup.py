@@ -7,7 +7,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = "olll",
+    name = "hep-olll",
     version = "0.1.0",
     author = "OLLL collaboration",
     author_email="",
@@ -16,7 +16,8 @@ setup(
     description="Neural network adapter for LHC likelihood interpretation",
     license="GPLv3",
     url="https://github.com/OpenML-LHClikelihoods/",
-    py_modules=["nnAdapter", "nnPreprocessing", "metadataValidator" ],
+    packages=["hep_olll" ],
+    # py_modules=["nnAdapter", "nnPreprocessing", "metadataValidator" ],
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     classifiers=[
