@@ -72,5 +72,5 @@ sigma_obsA: 0.0
 The NNAdapter can also be accessed via
 
 ```
-pip install -i https://test.pypi.org/simple/ olll
+pip install -i https://test.pypi.org/simple/ hep_olll
 ```
