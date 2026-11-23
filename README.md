@@ -69,8 +69,8 @@ sigma_expA: 0.0
 sigma_obsA: 0.0
 ```
 
-The NNAdapter can also be accessed via
+The NNAdapter can also be installed via
 
 ```
-pip install -i https://test.pypi.org/simple/ hep_olll
+pip install hep_olll
 ```

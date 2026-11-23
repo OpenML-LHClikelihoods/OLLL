@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name = "hep-olll",
-    version = "0.1.3",
+    version = "0.1.0",
     author = "OLLL collaboration",
     author_email="",
     python_requires='>=3.10',
@@ -21,7 +21,7 @@ setup(
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Topic :: Scientific/Engineering :: Physics",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     ]
