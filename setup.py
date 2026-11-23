@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name = "hep-olll",
-    version = "0.1.0",
+    version = "0.1.3",
     author = "OLLL collaboration",
     author_email="",
     python_requires='>=3.10',
